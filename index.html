@@ -45,11 +45,12 @@ button.ghost{background:#1d2649;color:var(--fg);border:1px solid var(--line);fon
 .expr b.blk{color:var(--acc2);font-weight:600}
 .hint{font-size:12px;color:#6f7aa6;margin-top:10px;line-height:1.6}
 .foot{text-align:center;color:#4a5480;font-size:12px;margin-top:22px;line-height:1.8}
-.mask{position:fixed;inset:0;background:rgba(4,7,18,.88);display:flex;align-items:center;justify-content:center;padding:20px;z-index:9}
-.mask img{max-width:100%;max-height:72vh;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
+.mask{position:fixed;inset:0;background:rgba(4,7,18,.9);display:none;align-items:center;justify-content:center;padding:20px;z-index:9;overflow-y:auto;-webkit-overflow-scrolling:touch}
+.mask.show{display:flex}
+.mask img{max-width:100%;max-height:70vh;border-radius:14px;box-shadow:0 12px 40px rgba(0,0,0,.5)}
 .mask .tip{color:var(--mut);font-size:13px;text-align:center;margin-top:12px}
-.mask .inner{display:flex;flex-direction:column;align-items:center;max-width:420px}
-.mask button{margin-top:14px;background:#1d2649;color:var(--fg);border:1px solid var(--line);font-weight:500}
+.mask .inner{display:flex;flex-direction:column;align-items:center;max-width:420px;width:100%;max-height:100%;overflow-y:auto}
+.mask button{margin-top:14px;background:#1d2649;color:var(--fg);border:1px solid var(--line);font-weight:500;flex:none}
 .toast{position:fixed;left:50%;bottom:36px;transform:translateX(-50%);background:rgba(30,40,80,.96);color:#fff;padding:10px 18px;border-radius:99px;font-size:13px;opacity:0;transition:.25s;pointer-events:none;z-index:20}
 .toast.show{opacity:1}
 </style>
@@ -89,7 +90,7 @@ button.ghost{background:#1d2649;color:var(--fg);border:1px solid var(--line);fon
   <div class="foot">3、2、5 各用一次 · 顺序不变 · 四则运算 + 括号<br>穷举搜索，结果可验证</div>
 </div>
 
-<div class="mask hide" id="mask">
+<div class="mask" id="mask">
   <div class="inner">
     <img id="shot" alt="分享图">
     <div class="tip">长按图片保存，就能发到群里</div>
@@ -515,15 +516,20 @@ button.ghost{background:#1d2649;color:var(--fg);border:1px solid var(--line);fon
     return c.toDataURL('image/png');
   }
 
+  function closeMask() {
+    $('mask').className = 'mask';
+  }
+
   $('pic').onclick = function () {
     if (!cur) return;
     try {
       $('shot').src = makePic(cur);
-      $('mask').className = 'mask';
+      $('mask').className = 'mask show';
     } catch (e) { toast('生成图片失败'); }
   };
-  $('close').onclick = function () { $('mask').className = 'mask hide'; };
-  $('mask').onclick = function (e) { if (e.target === $('mask')) $('mask').className = 'mask hide'; };
+  $('close').onclick = closeMask;
+  $('mask').onclick = function (e) { if (e.target === $('mask')) closeMask(); };
+  document.addEventListener('keydown', function (e) { if (e.key === 'Escape') closeMask(); });
 
   // 首屏：支持 ?n=233 指定题目
   var qm = /[?&]n=(\d+)/.exec(location.search || '');
